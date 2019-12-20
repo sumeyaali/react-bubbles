@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import axios from "axios";
-import {Link} from "react-router-dom";
 import { axiosWithAuth } from "../utils/axiosWithAuth";
+import {Link} from "react-router-dom";
 
 const initialColor = {
   color: "",
   code: { hex: "" }
 };
 
-const ColorList = (props) => {
+const ColorList = ({colors, setColors}) => {
   // console.log(props.colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
@@ -24,11 +23,11 @@ const ColorList = (props) => {
     // where is is saved right now?
     e.preventDefault();
     axiosWithAuth()
-    .put(`http:localhost:5000/api/colors/${colorToEdit.id}`, colorToEdit)
+    .put(`/colors/${colorToEdit.id}`, colorToEdit)
     .then(res => {
       console.log(res.data)
-        props.updateColors(res.data)
-        props.history.push(`/colors/${colorToEdit.id}`)
+        setColors(window.location.reload(res.data))
+      //  colors.history.push(`/colors/${colorToEdit.id}`)
     })
     .catch(err => console.log(err))
     
@@ -37,19 +36,19 @@ const ColorList = (props) => {
   const deleteColor = color => {
     // make a delete request to delete this color
     axiosWithAuth()
-    .delete(`http:localhost:5000/api/color/${color.id}`)
+    .delete(`/colors/${color.id}`)
     .then(res => {
-      props.setColors({color: res.data})
-      props.history.push('/')
+      setColors(window.location.reload(res.data))
+      // props.history.push('/')
     })
     .catch(err => console.log(err))
   };
-
+console.log(colors)
   return (
     <div className="colors-wrap">
       <p>colors</p>
       <ul>
-        {props.colors.map(color => (
+        {colors.map(color => (
           <li key={color.color} onClick={() => editColor(color)}>
             <span>
               <span className="delete" onClick={e => {
@@ -93,9 +92,9 @@ const ColorList = (props) => {
             />
           </label>
           <div className="button-row">
-            <Link to={`/bubbles/${props.colors.id}`}> 
+             
             <button type="submit">save</button>
-            </Link>
+            
             <button onClick={() => setEditing(false)}>cancel</button>
           </div>
         </form>
