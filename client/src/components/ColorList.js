@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { axiosWithAuth } from "../utils/axiosWithAuth";
+import {Link} from "react-router-dom";
 
 const initialColor = {
   color: "",
   code: { hex: "" }
 };
 
-const ColorList = ({ colors, updateColors }) => {
-  console.log(colors);
+const ColorList = ({colors, setColors}) => {
+  // console.log(props.colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
 
@@ -17,16 +18,32 @@ const ColorList = ({ colors, updateColors }) => {
   };
 
   const saveEdit = e => {
-    e.preventDefault();
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is is saved right now?
+    e.preventDefault();
+    axiosWithAuth()
+    .put(`/colors/${colorToEdit.id}`, colorToEdit)
+    .then(res => {
+      console.log(res.data)
+        setColors(window.location.reload(res.data))
+      //  colors.history.push(`/colors/${colorToEdit.id}`)
+    })
+    .catch(err => console.log(err))
+    
   };
 
   const deleteColor = color => {
     // make a delete request to delete this color
+    axiosWithAuth()
+    .delete(`/colors/${color.id}`)
+    .then(res => {
+      setColors(window.location.reload(res.data))
+      // props.history.push('/')
+    })
+    .catch(err => console.log(err))
   };
-
+console.log(colors)
   return (
     <div className="colors-wrap">
       <p>colors</p>
@@ -75,7 +92,9 @@ const ColorList = ({ colors, updateColors }) => {
             />
           </label>
           <div className="button-row">
+             
             <button type="submit">save</button>
+            
             <button onClick={() => setEditing(false)}>cancel</button>
           </div>
         </form>
