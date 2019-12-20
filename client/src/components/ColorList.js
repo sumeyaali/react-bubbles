@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
+import {Link} from "react-router-dom";
+import { axiosWithAuth } from "../utils/axiosWithAuth";
 
 const initialColor = {
   color: "",
   code: { hex: "" }
 };
 
-const ColorList = ({ colors, updateColors }) => {
-  console.log(colors);
+const ColorList = (props) => {
+  // console.log(props.colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
 
@@ -17,21 +19,37 @@ const ColorList = ({ colors, updateColors }) => {
   };
 
   const saveEdit = e => {
-    e.preventDefault();
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is is saved right now?
+    e.preventDefault();
+    axiosWithAuth()
+    .put(`http:localhost:5000/api/colors/${colorToEdit.id}`, colorToEdit)
+    .then(res => {
+      console.log(res.data)
+        props.updateColors(res.data)
+        props.history.push(`/colors/${colorToEdit.id}`)
+    })
+    .catch(err => console.log(err))
+    
   };
 
   const deleteColor = color => {
     // make a delete request to delete this color
+    axiosWithAuth()
+    .delete(`http:localhost:5000/api/color/${color.id}`)
+    .then(res => {
+      props.setColors({color: res.data})
+      props.history.push('/')
+    })
+    .catch(err => console.log(err))
   };
 
   return (
     <div className="colors-wrap">
       <p>colors</p>
       <ul>
-        {colors.map(color => (
+        {props.colors.map(color => (
           <li key={color.color} onClick={() => editColor(color)}>
             <span>
               <span className="delete" onClick={e => {
@@ -75,7 +93,9 @@ const ColorList = ({ colors, updateColors }) => {
             />
           </label>
           <div className="button-row">
+            <Link to={`/bubbles/${props.colors.id}`}> 
             <button type="submit">save</button>
+            </Link>
             <button onClick={() => setEditing(false)}>cancel</button>
           </div>
         </form>
